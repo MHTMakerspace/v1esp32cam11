@@ -1,0 +1,64 @@
+#include "secrets.h"
+
+function doPost(e) {
+  const sharedapikey=SHAREDAPIKEY;
+  //var data = e.parameters.data;
+  var data = Utilities.base64Decode(e.parameters.data);
+  var camera = e.parameters.camera;
+  var datefolder = e.parameters.folder;
+  var filename = e.parameters.filename;
+  var apikey = e.parameters.apikey;
+ 
+
+//var camera=getParameterByName("camera",e.queryString);
+// var datefolder=getParameterByName("datefolder",e.queryString);
+//var filename=getParameterByName("filename",e.queryString); 
+//var apikey=getParameterByName("apikey",e.queryString);
+
+//  if(camera.length==0)
+//    return ContentService.createTextOutput("What are you?");
+//  if(datefolder.length==0)
+//    return ContentService.createTextOutput("When are you?");
+//  if(filename.length==0)
+//    return ContentService.createTextOutput("Where are you?");
+//  
+  if(! apikey==sharedapikey) {
+    return ContentService.createTextOutput("Who are you?");
+  }
+  Logger.log("Supplied a valid API key for file %s",filename);
+
+//  if(data.length==0) {
+//     return ContentService.createTextOutput("Empty files are unacceptable");
+//  }
+  
+
+  //Logger.log("Requesting a %d byte blob named %s of type %s",data.length,filename,e.parameters.mimetype);
+
+  // Create a blob from the supplied data
+   var blob = Utilities.newBlob(data, "image/jpeg", filename );
+  
+  var parentfolder, folders = DriveApp.getFoldersByName(camera);
+  if (folders.hasNext()) {
+    parentfolder = folders.next();
+  } else {
+    parentfolder = DriveApp.createFolder(camera);
+  }
+ 
+var cfolder, cfolders= parentfolder.getFoldersByName(datefolder); 
+  if (cfolders.hasNext()) {
+    cfolder = cfolders.next();
+  } else {
+    cfolder = parentfolder.createFolder(datefolder);
+  }
+  var file = cfolder.createFile(blob); 
+
+  return ContentService.createTextOutput("Success.")
+
+}
+
+//function getParameterByName(name, src) {
+//        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+//        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+//            results = regex.exec(src);
+//        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+//    }
